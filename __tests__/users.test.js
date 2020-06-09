@@ -81,5 +81,65 @@ describe('user routes', () => {
       });
   });
 
+  // it('gets all users in a particular organization with GET', async() => {
+  //   await User.create([
+  //     {
+  //       name: 'Jenny',
+  //       phone: '555-867-5309',
+  //       email: 'jenny@jenny.com',
+  //       communicationMedium: 'phone',
+  //       imageUrl: 'www.myspace.com/jenny.png',
+  //       organization: 'Portland Police Department'
+  //     },
+  //     {
+  //       name: 'Jasper',
+  //       phone: '555-555-5555',
+  //       email: 'jasper@bestdog.com',
+  //       communicationMedium: 'phone',
+  //       imageUrl: 'www.myspace.com/jasper.png',
+  //       organization: 'dogs'
+  //     },
+  //     {
+  //       name: 'Lola',
+  //       phone: '555-555-0666',
+  //       email: 'lola@cutecat.com',
+  //       communicationMedium: 'phone',
+  //       imageUrl: 'www.myspace.com/lola.png',
+  //       organization: 'cats'
+  //     }
+  //   ]);
+
+  //   return request(app)
+  //     .get('/api/v1/users?organization=dogs')
+  //     .then(res => {
+  //       expect(res.body).toEqual([{
+  //         _id: expect.anything(),
+  //         name: 'Jasper',
+  //         imageUrl: 'www.myspace.com/jasper.png'
+  //       }]);
+  //     });
+  // });
+
+  it('gets a user by id with GET', () => {
+    return User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png'
+    })
+      .then(user => request(app).get(`/api/v1/users/${user._id}`))
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          name: 'Jenny',
+          phone: '555-867-5309',
+          email: 'jenny@jenny.com',
+          communicationMedium: 'phone',
+          imageUrl: 'www.myspace.com/jenny.png',
+          __v:0
+        });
+      });
+  });
 
 });
