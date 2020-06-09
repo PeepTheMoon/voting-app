@@ -73,6 +73,23 @@ describe('organization routes', () => {
       });
   });
 
+  it('gets an organization by id with GET', () => {
+    return Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    })
+      .then(organization => request(app).get(`/api/v1/organizations/${organization._id}`))
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          title: 'Portland Police Department',
+          description: 'Police Department for Portland, OR',
+          imageUrl: 'www.policeimage.com/police.png',
+          __v: 0
+        });
+      });
+  });
 
 
 });
