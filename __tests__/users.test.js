@@ -45,4 +45,22 @@ describe('user routes', () => {
       });
   });
 
+  it('fails to create a new user with POST when bad data is entered', () => {
+    return request(app)
+      .post('/api/v1/users')
+      .send({
+        name: 'Jenny',
+        phone: '555-867-5309',
+        email: 'jenny@jenny.com',
+        communicationMedium: 'text',
+        imageUrl: 'www.myspace.com/jenny.png'
+      })
+      .then(res => {
+        expect(res.body).toEqual({
+          status: 400,
+          message: 'User validation failed: communicationMedium: `text` is not a valid enum value for path `communicationMedium`.'
+        });
+      });
+  });
+
 });
