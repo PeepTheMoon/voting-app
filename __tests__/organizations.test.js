@@ -91,5 +91,27 @@ describe('organization routes', () => {
       });
   });
 
+  it('updates an organization by id with PATCH', () => {
+    return Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    })
+      .then(organization => {
+        return request(app)
+          .patch(`/api/v1/organizations/${organization._id}`)
+          .send({ description: 'Portland City Police' });
+      })
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          title: 'Portland Police Department',
+          description: 'Portland City Police',
+          imageUrl: 'www.policeimage.com/police.png',
+          __v: 0
+        });
+      });
+  });
+
 
 });
