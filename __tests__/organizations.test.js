@@ -130,6 +130,4 @@ describe('organization routes', () => {
         });
       });
   });
-
-
 });
