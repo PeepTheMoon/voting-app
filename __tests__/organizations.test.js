@@ -113,5 +113,23 @@ describe('organization routes', () => {
       });
   });
 
+  it('deletes an organization by id with DELETE', () => {
+    return Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    })
+      .then(organization => request(app).delete(`/api/v1/organizations/${organization._id}`))
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          title: 'Portland Police Department',
+          description: 'Police Department for Portland, OR',
+          imageUrl: 'www.policeimage.com/police.png',
+          __v: 0
+        });
+      });
+  });
+
 
 });
