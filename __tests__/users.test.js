@@ -63,4 +63,23 @@ describe('user routes', () => {
       });
   });
 
+  it('gets all users with GET', () => {
+    return User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png'
+    })
+      .then(() => request(app).get('/api/v1/users'))
+      .then(res => {
+        expect(res.body).toEqual([{
+          _id: expect.anything(),
+          name: 'Jenny',
+          imageUrl: 'www.myspace.com/jenny.png'
+        }]);
+      });
+  });
+
+
 });
