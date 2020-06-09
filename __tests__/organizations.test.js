@@ -41,4 +41,20 @@ describe('organization routes', () => {
       });
   });
 
+  it('fails to create an organization if bad data is given', () => {
+    return request(app)
+      .post('/api/v1/organizations')
+      .send({
+        name: 'Portland Police Department',
+        description: 'Police Department for Portland, OR',
+        imageUrl: 'www.policeimage.com/police.png'
+      })
+      .then(res => {
+        expect(res.body).toEqual({
+          status: 400,
+          message: 'Organization validation failed: title: Path `title` is required.'
+        });
+      });
+  });
+
 });
