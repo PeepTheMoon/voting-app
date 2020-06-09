@@ -110,7 +110,7 @@ describe('user routes', () => {
   //   ]);
 
   //   return request(app)
-  //     .get('/api/v1/users?organization=dogs')
+  //     .get('/api/v1/users?organization=ORG_ID')
   //     .then(res => {
   //       expect(res.body).toEqual([{
   //         _id: expect.anything(),
@@ -142,4 +142,54 @@ describe('user routes', () => {
       });
   });
 
+  it('updates a user by id with PATCH', () => {
+    return User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png'
+    })
+      .then(user => {
+        return request(app)
+          .patch(`/api/v1/users/${user._id}`)
+          .send({
+            phone: '555-555-5555',
+            email: 'jenny@gmail.com'
+          });
+      })
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          name: 'Jenny',
+          phone: '555-555-5555',
+          email: 'jenny@gmail.com',
+          communicationMedium: 'phone',
+          imageUrl: 'www.myspace.com/jenny.png',
+          __v: 0
+        });
+      });
+  });
+
+  it('deletes a user by id with DELETE', () => {
+    return User.create({
+      name: 'Jenny',
+      phone: '555-555-5555',
+      email: 'jenny@gmail.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png'
+    })
+      .then(user => request(app).delete(`/api/v1/users/${user._id}`))
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          name: 'Jenny',
+          phone: '555-555-5555',
+          email: 'jenny@gmail.com',
+          communicationMedium: 'phone',
+          imageUrl: 'www.myspace.com/jenny.png',
+          __v: 0
+        });
+      });
+  });
 });
