@@ -67,9 +67,12 @@ describe('organization routes', () => {
       .then(res => {
         expect(res.body).toEqual([{
           _id: expect.anything(),
-          title: 'Portland Police Department'
+          title: 'Portland Police Department',
+          imageUrl: 'www.policeimage.com/police.png'
         }]);
       });
   });
+
+
 
 });
