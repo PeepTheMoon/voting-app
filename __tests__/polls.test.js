@@ -53,7 +53,28 @@ describe('poll routes', () => {
       });
   });
 
-
+  it('gets all polls for a specific organization with GET', () => {
+    return Poll.create({
+      organization: org._id,
+      title: 'Should we defund the police?',
+      description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+      options: ['for', 'against']
+    })
+      .then(() => request(app).get(`/api/v1/polls?organization=${org.id}`))
+      .then(res => {
+        expect(res.body).toEqual([{
+          organization: {
+            _id: expect.anything(),
+            title: 'Portland Police Department'
+          },
+          _id: expect.anything(),
+          title: 'Should we defund the police?',
+          description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+          options: ['for', 'against'],
+          __v: 0
+        }]);
+      });
+  });
 
 
 });
