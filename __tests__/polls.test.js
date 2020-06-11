@@ -124,4 +124,24 @@ describe('poll routes', () => {
       });
   });
 
+  it('deletes a poll by id with DELETE', () => {
+    return Poll.create({
+      organization: org._id,
+      title: 'Should we defund the police?',
+      description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+      options: ['for', 'against']
+    })
+      .then(poll => request(app).delete(`/api/v1/polls/${poll._id}`))
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          organization: org.id,
+          title: 'Should we defund the police?',
+          description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+          options: ['for', 'against'],
+          __v: 0
+        });
+      });
+  });
+
 });
