@@ -76,28 +76,31 @@ describe('poll routes', () => {
       });
   });
 
-  // it('gets all polls by id for a specific organization with GET', () => {
-  //   return Poll.create({
-  //     organization: org._id,
-  //     title: 'Should we defund the police?',
-  //     description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
-  //     options: ['for', 'against']
-  //   })
-  //     .then(() => request(app).get(`/api/v1/polls/${poll._id}?organization=${org.id}`))
-  //     .then(res => {
-  //       expect(res.body).toEqual([{
-  //         organization: {
-  //           _id: expect.anything(),
-  //           title: 'Portland Police Department'
-  //         },
-  //         _id: expect.anything(),
-  //         title: 'Should we defund the police?',
-  //         description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
-  //         options: ['for', 'against'],
-  //         __v: 0
-  //       }]);
-  //     });
-  // });
+  it('gets all polls by id for a specific organization with GET', () => {
+    return Poll.create({
+      organization: org._id,
+      title: 'Should we defund the police?',
+      description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+      options: ['for', 'against']
+    })
+      .then(poll => request(app).get(`/api/v1/polls/${poll.id}`))
+      .then(res => {
+        expect(res.body).toEqual({
+          organization: {
+            _id: expect.anything(),
+            title: 'Portland Police Department',
+            description: 'Police Department for Portland, OR',
+            imageUrl: 'www.policeimage.com/police.png',
+            __v: 0
+          },
+          _id: expect.anything(),
+          title: 'Should we defund the police?',
+          description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+          options: ['for', 'against'],
+          __v: 0
+        });
+      });
+  });
 
   it('updates a poll by id with PATCH', () => {
     return Poll.create({
@@ -143,5 +146,4 @@ describe('poll routes', () => {
         });
       });
   });
-
 });
