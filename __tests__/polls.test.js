@@ -76,5 +76,52 @@ describe('poll routes', () => {
       });
   });
 
+  // it('gets all polls by id for a specific organization with GET', () => {
+  //   return Poll.create({
+  //     organization: org._id,
+  //     title: 'Should we defund the police?',
+  //     description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+  //     options: ['for', 'against']
+  //   })
+  //     .then(() => request(app).get(`/api/v1/polls/${poll._id}?organization=${org.id}`))
+  //     .then(res => {
+  //       expect(res.body).toEqual([{
+  //         organization: {
+  //           _id: expect.anything(),
+  //           title: 'Portland Police Department'
+  //         },
+  //         _id: expect.anything(),
+  //         title: 'Should we defund the police?',
+  //         description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+  //         options: ['for', 'against'],
+  //         __v: 0
+  //       }]);
+  //     });
+  // });
+
+  it('updates a poll by id with PATCH', () => {
+    return Poll.create({
+      organization: org._id,
+      title: 'Should we defund the police?',
+      description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+      options: ['for', 'against']
+    })
+      .then(poll => {
+        return request(app)
+          .patch(`/api/v1/polls/${poll._id}`)
+          .send({ 
+            title: 'Should we have pizza for breakfast?', description: 'Everyone wants pizza for breakfast.  Is it a good idea?' });
+      })
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          organization: org.id,
+          title: 'Should we have pizza for breakfast?',
+          description: 'Everyone wants pizza for breakfast.  Is it a good idea?',
+          options: ['for', 'against'],
+          __v: 0
+        });
+      });
+  });
 
 });
