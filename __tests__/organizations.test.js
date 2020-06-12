@@ -6,6 +6,7 @@ const connect = require('../lib/utils/connect');
 const request = require('supertest');
 const app = require('../lib/app');
 const Organization = require('../lib/models/Organization');
+const Poll = require('../lib/models/Poll');
 
 describe('organization routes', () => {
   beforeAll(async() => {
@@ -113,13 +114,43 @@ describe('organization routes', () => {
       });
   });
 
-  it('deletes an organization by id with DELETE', () => {
-    return Organization.create({
+  // it('deletes an organization by id with DELETE', () => {
+  //   return Organization.create({
+  //     title: 'Portland Police Department',
+  //     description: 'Police Department for Portland, OR',
+  //     imageUrl: 'www.policeimage.com/police.png'
+  //   })
+  //     .then(organization => request(app).delete(`/api/v1/organizations/${organization._id}`))
+  //     .then(res => {
+  //       expect(res.body).toEqual({
+  //         _id: expect.anything(),
+  //         title: 'Portland Police Department',
+  //         description: 'Police Department for Portland, OR',
+  //         imageUrl: 'www.policeimage.com/police.png',
+  //         __v: 0
+  //       });
+  //     });
+  // });
+
+  it('deletes an organization and all polls and votes associated with the organization', async() => {
+
+    const organization = await Organization.create({
       title: 'Portland Police Department',
       description: 'Police Department for Portland, OR',
       imageUrl: 'www.policeimage.com/police.png'
-    })
-      .then(organization => request(app).delete(`/api/v1/organizations/${organization._id}`))
+    });
+
+    await Poll.create([
+      {
+        organization: organization._id,
+        title: 'Should we defund the police?',
+        description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+        options: ['for', 'against']
+      }
+    ]);
+
+    return request(app)
+      .delete(`/api/v1/organizations/${organization._id}`)
       .then(res => {
         expect(res.body).toEqual({
           _id: expect.anything(),
@@ -128,6 +159,11 @@ describe('organization routes', () => {
           imageUrl: 'www.policeimage.com/police.png',
           __v: 0
         });
+
+        return Poll.find({ organization: organization._id });
+      })
+      .then(polls => {
+        expect(polls).toEqual([]);
       });
   });
 });
