@@ -32,7 +32,7 @@ describe('poll routes', () => {
     return mongod.stop();
   });
 
-  it('creates a new poll with POST', async() => {
+  it('creates a new poll with POST', () => {
     return request(app)
       .post('/api/v1/polls')
       .send({
