@@ -113,5 +113,53 @@ describe('vote routes', () => {
       });
   });
 
+  it.only('gets all votes by a user with GET', async() => {
+    const user = await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png'
+    });
+
+    const organization = await Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    }); 
+
+    const poll = await Poll.create({
+      organization: organization._id,
+      title: 'Should we defund the police?',
+      description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+      options: ['for', 'against']
+    });
+
+    const vote = await Vote.create({
+      poll: poll._id,
+      user: user._id,
+      optionSelected: 'for'
+    });
+
+    return request(app)
+      .get(`/api/v1/votes?user=${user.id}`)
+      .then(res => {
+        expect(res.body).toEqual([{
+          _id: expect.anything(),
+          poll: {
+            __v: 0,
+            _id: poll.id,
+            description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+            options: ['for', 'against'],
+            organization: organization.id,
+            title: 'Should we defund the police?'
+          },
+          user: user.id,
+          optionSelected: 'for',
+          __v:0
+        }]);
+      });
+  });
+
 
 });
