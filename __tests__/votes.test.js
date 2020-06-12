@@ -161,7 +161,7 @@ describe('vote routes', () => {
       });
   });
 
-  it.only('allows user to change their vote with PATCH', async() => {
+  it('allows user to change their vote with PATCH', async() => {
     const user = await User.create({
       name: 'Jenny',
       phone: '555-867-5309',
