@@ -135,7 +135,7 @@ describe('vote routes', () => {
       options: ['for', 'against']
     });
 
-    const vote = await Vote.create({
+    await Vote.create({
       poll: poll._id,
       user: user._id,
       optionSelected: 'for'
