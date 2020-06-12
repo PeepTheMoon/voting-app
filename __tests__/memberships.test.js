@@ -95,5 +95,44 @@ describe('membership routes', () => {
       });
   });
 
+  it.only('gets all organizations a user is a member of with GET', async() => {
+    const organization = await Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    });
+
+    const user = await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png'
+    });
+
+    const membership = await Membership.create({
+      organization: organization.id,
+      user: user.id
+    });
+
+    return request(app)
+      .get(`/api/v1/memberships?user=${user._id}`)
+      .then(res => {
+        expect(res.body).toEqual([{
+          _id: membership.id,
+          organization: { 
+            _id: organization.id,
+            title: organization.title,
+            imageUrl: organization.imageUrl
+          },
+          user: {
+            _id: user.id,
+            name: user.name,
+            imageUrl: user.imageUrl
+          },
+          __v: 0
+        }]);
+      });
+  });
 
 });
