@@ -95,7 +95,7 @@ describe('membership routes', () => {
       });
   });
 
-  it.only('gets all organizations a user is a member of with GET', async() => {
+  it('gets all organizations a user is a member of with GET', async() => {
     const organization = await Organization.create({
       title: 'Portland Police Department',
       description: 'Police Department for Portland, OR',
@@ -132,6 +132,38 @@ describe('membership routes', () => {
           },
           __v: 0
         }]);
+      });
+  });
+
+  it('deletes a user membership with DELETE', async() => {
+    const organization = await Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    });
+
+    const user = await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png'
+    });
+
+    const membership = await Membership.create({
+      organization: organization.id,
+      user: user.id
+    });
+
+    return request(app)
+      .delete(`/api/v1/memberships/${membership._id}`)
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          organization: organization.id,
+          user: user.id,
+          __v: 0
+        });
       });
   });
 
