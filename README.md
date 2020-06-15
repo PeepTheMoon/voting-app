@@ -12,7 +12,7 @@ Phase 3 req's:
 
 Owner = org, parlor = poll, pizza = vote
 
-* when deleting an organization also delete all polls and votes associated with the organization
+X * when deleting an organization also delete all polls and votes associated with the organization
 
 * when deleting a membership also delete all votes made by that member
 
