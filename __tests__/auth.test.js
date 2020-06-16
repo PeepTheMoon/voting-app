@@ -77,5 +77,39 @@ describe('auth routes', () => {
       });
   });
 
+  it('verifies if a user is logged in with GET', async() => {
+    const user = await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+      .then(() => {
+        return agent
+          .get('/api/v1/auth/verify');
+      })
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: user.id,
+          name: 'Jenny',
+          phone: '555-867-5309',
+          email: 'jenny@jenny.com',
+          communicationMedium: 'phone',
+          imageUrl: 'www.myspace.com/jenny.png',
+          __v: 0
+        });
+      });
+  });
 });
 
