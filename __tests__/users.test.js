@@ -91,16 +91,26 @@ describe('user routes', () => {
       });
   });
 
-  it('updates a user by id with PATCH', () => {
-    return User.create({
+  it('updates a user by id with PATCH', async() => {
+    const user = await User.create({
       name: 'Jenny',
       phone: '555-867-5309',
       email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
-    })
-      .then(user => {
-        return request(app)
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+      .then(() => {
+        return agent
           .patch(`/api/v1/users/${user._id}`)
           .send({
             phone: '555-555-5555',
@@ -109,7 +119,7 @@ describe('user routes', () => {
       })
       .then(res => {
         expect(res.body).toEqual({
-          _id: expect.anything(),
+          _id: user.id,
           name: 'Jenny',
           phone: '555-555-5555',
           email: 'jenny@gmail.com',
@@ -120,25 +130,38 @@ describe('user routes', () => {
       });
   });
 
-  it('deletes a user by id with DELETE', () => {
-    return User.create({
+  it('deletes a user by id with DELETE', async() => {
+    const user = await User.create({
       name: 'Jenny',
-      phone: '555-555-5555',
-      email: 'jenny@gmail.com',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
-    })
-      .then(user => request(app).delete(`/api/v1/users/${user._id}`))
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.anything(),
-          name: 'Jenny',
-          phone: '555-555-5555',
-          email: 'jenny@gmail.com',
-          communicationMedium: 'phone',
-          imageUrl: 'www.myspace.com/jenny.png',
-          __v: 0
-        });
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+      .then(() => {
+        return agent
+          .delete(`/api/v1/users/${user._id}`)
+          .then(res => {
+            expect(res.body).toEqual({
+              _id: user.id,
+              name: 'Jenny',
+              phone: '555-867-5309',
+              email: 'jenny@jenny.com',
+              communicationMedium: 'phone',
+              imageUrl: 'www.myspace.com/jenny.png',
+              __v: 0
+            });
+          });
       });
   });
 });
