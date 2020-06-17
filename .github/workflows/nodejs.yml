@@ -14,5 +14,6 @@ jobs:
         node-version: '14.x'
     - run: npm ci
     - run: npm test
-      env:
+      env: 
         CI: true
+        APP_SECRET: superdupersecret
