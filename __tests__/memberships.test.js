@@ -50,13 +50,14 @@ describe('membership routes', () => {
         email: 'jenny@jenny.com',
         password: '5309'
       })
-      .then(() => agent
 
+      .then(() => agent
         .post('/api/v1/memberships')
         .send({
           organization: organization._id,
           user: user._id
         }))
+
       .then(res => {
         expect(res.body).toEqual({
           _id: expect.anything(),
@@ -96,6 +97,7 @@ describe('membership routes', () => {
         email: 'jenny@jenny.com',
         password: '5309'
       })
+
       .then(() => agent
         .get(`/api/v1/memberships?organization=${organization._id}`)
         .then(res => {
@@ -145,6 +147,7 @@ describe('membership routes', () => {
         email: 'jenny@jenny.com',
         password: '5309'
       })
+
       .then(() => agent
         .get(`/api/v1/memberships?user=${user._id}`)
         .then(res => {
@@ -194,6 +197,7 @@ describe('membership routes', () => {
         email: 'jenny@jenny.com',
         password: '5309'
       })
+      
       .then(() => agent
         .delete(`/api/v1/memberships/${membership._id}`)
         .then(res => {
