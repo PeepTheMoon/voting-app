@@ -118,18 +118,38 @@ describe('poll routes', () => {
       });
   });
 
-  it('gets all polls by id for a specific organization with GET', () => {
-    return Poll.create({
+  it('gets all polls by id for a specific organization with GET', async() => {
+    await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const poll = await Poll.create({
       organization: org._id,
       title: 'Should we defund the police?',
       description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
       options: ['for', 'against']
-    })
-      .then(poll => request(app).get(`/api/v1/polls/${poll.id}`))
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+
+      .then(() => agent
+        .get(`/api/v1/polls/${poll.id}`))
       .then(res => {
         expect(res.body).toEqual({
           organization: {
-            _id: expect.anything(),
+            _id: org.id,
             title: 'Portland Police Department',
             description: 'Police Department for Portland, OR',
             imageUrl: 'www.policeimage.com/police.png',
@@ -145,19 +165,39 @@ describe('poll routes', () => {
       });
   });
 
-  it('updates a poll by id with PATCH', () => {
-    return Poll.create({
+  it('updates a poll by id with PATCH', async() => {
+    await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const poll = await Poll.create({
       organization: org._id,
       title: 'Should we defund the police?',
       description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
       options: ['for', 'against']
-    })
-      .then(poll => {
-        return request(app)
-          .patch(`/api/v1/polls/${poll._id}`)
-          .send({ 
-            title: 'Should we have pizza for breakfast?', description: 'Everyone wants pizza for breakfast.  Is it a good idea?' });
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
       })
+
+      .then(() => agent
+        .patch(`/api/v1/polls/${poll._id}`)
+        .send({ 
+          title: 'Should we have pizza for breakfast?', 
+          description: 'Everyone wants pizza for breakfast.  Is it a good idea?' 
+        })
+      )
       .then(res => {
         expect(res.body).toEqual({
           _id: expect.anything(),
@@ -170,23 +210,43 @@ describe('poll routes', () => {
       });
   });
 
-  it('deletes a poll by id with DELETE', () => {
-    return Poll.create({
+  it('deletes a poll by id with DELETE', async() => {
+    await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const poll = await Poll.create({
       organization: org._id,
       title: 'Should we defund the police?',
       description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
       options: ['for', 'against']
-    })
-      .then(poll => request(app).delete(`/api/v1/polls/${poll._id}`))
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.anything(),
-          organization: org.id,
-          title: 'Should we defund the police?',
-          description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
-          options: ['for', 'against'],
-          __v: 0
-        });
-      });
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+
+      .then(() => agent
+        .delete(`/api/v1/polls/${poll._id}`)
+        .then(res => {
+          expect(res.body).toEqual({
+            _id: expect.anything(),
+            organization: org.id,
+            title: 'Should we defund the police?',
+            description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+            options: ['for', 'against'],
+            __v: 0
+          });
+        }));
   });
 });
