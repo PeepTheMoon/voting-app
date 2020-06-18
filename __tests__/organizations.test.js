@@ -7,9 +7,11 @@ const connect = require('../lib/utils/connect');
 
 const request = require('supertest');
 const app = require('../lib/app');
+
 const Organization = require('../lib/models/Organization');
 const Poll = require('../lib/models/Poll');
 const User = require('../lib/models/User');
+const Membership = require('../lib/models/Membership');
 
 describe('organization routes', () => {
   beforeAll(async() => {
@@ -133,8 +135,8 @@ describe('organization routes', () => {
         }));
   });
 
-  it('gets an organization by id with GET', async() => {
-    await User.create({
+  it('gets an organization by id and its members with GET', async() => {
+    const user = await User.create({
       name: 'Jenny',
       phone: '555-867-5309',
       email: 'jenny@jenny.com',
@@ -147,6 +149,11 @@ describe('organization routes', () => {
       title: 'Portland Police Department',
       description: 'Police Department for Portland, OR',
       imageUrl: 'www.policeimage.com/police.png'
+    });
+
+    await Membership.create({
+      organization: organization._id,
+      user: user._id
     });
 
     const agent = request.agent(app);
@@ -166,7 +173,16 @@ describe('organization routes', () => {
           title: 'Portland Police Department',
           description: 'Police Department for Portland, OR',
           imageUrl: 'www.policeimage.com/police.png',
-          memberships: [],
+          memberships: [{
+            _id: expect.anything(),
+            organization: organization.id,
+            user: {
+              _id: user.id,
+              name: user.name,
+              imageUrl: user.imageUrl
+            },
+            __v: 0
+          }],
           __v: 0
         });
       });
