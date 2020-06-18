@@ -7,7 +7,10 @@ const connect = require('../lib/utils/connect');
 
 const request = require('supertest');
 const app = require('../lib/app');
+
 const User = require('../lib/models/User');
+const Organization = require('../lib/models/Organization');
+const Membership = require('../lib/models/Membership');
 
 describe('user routes', () => {
   beforeAll(async() => {
@@ -55,7 +58,7 @@ describe('user routes', () => {
       });
   });
 
-  it('gets a user by id with GET', async() => {
+  it('gets a user by id and organizations they`re a member of with GET', async() => {
     const user = await User.create({
       name: 'Jenny',
       phone: '555-867-5309',
@@ -63,6 +66,17 @@ describe('user routes', () => {
       communicationMedium: 'phone',
       imageUrl: 'www.myspace.com/jenny.png',
       password: '5309'
+    });
+
+    const organization = await Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    });
+
+    await Membership.create({
+      organization: organization._id,
+      user: user._id
     });
 
     const agent = request.agent(app);
@@ -75,7 +89,6 @@ describe('user routes', () => {
       })
       .then(() => {
         return agent
-      
           .get(`/api/v1/users/${user._id}`)
           .then(res => {
             expect(res.body).toEqual({
@@ -85,7 +98,17 @@ describe('user routes', () => {
               email: 'jenny@jenny.com',
               communicationMedium: 'phone',
               imageUrl: 'www.myspace.com/jenny.png',
-              __v:0
+              __v:0,
+              memberships: [{
+                _id: expect.anything(),
+                user: user.id,
+                __v: 0,
+                organization: {
+                  _id: organization.id,
+                  title: organization.title,
+                  imageUrl: organization.imageUrl
+                }
+              }]
             });
           });
       });
