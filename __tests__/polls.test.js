@@ -32,7 +32,7 @@ describe('poll routes', () => {
     return mongod.stop();
   });
 
-  it('creates a new poll with POST', async() => {
+  it('creates a new poll with POST', () => {
     return request(app)
       .post('/api/v1/polls')
       .send({
@@ -97,6 +97,7 @@ describe('poll routes', () => {
           title: 'Should we defund the police?',
           description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
           options: ['for', 'against'],
+          votes: 0,
           __v: 0
         });
       });
