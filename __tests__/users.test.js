@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongod = new MongoMemoryServer();
 const mongoose = require('mongoose');
@@ -5,7 +7,10 @@ const connect = require('../lib/utils/connect');
 
 const request = require('supertest');
 const app = require('../lib/app');
+
 const User = require('../lib/models/User');
+const Organization = require('../lib/models/Organization');
+const Membership = require('../lib/models/Membership');
 
 describe('user routes', () => {
   beforeAll(async() => {
@@ -22,136 +27,113 @@ describe('user routes', () => {
     return mongod.stop();
   });
 
-  it('creates a new user with POST', () => {
-    return request(app)
-      .post('/api/v1/users')
+  it('gets all users with GET', async() => {
+    const user = await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
       .send({
-        name: 'Jenny',
-        phone: '555-867-5309',
         email: 'jenny@jenny.com',
-        communicationMedium: 'phone',
-        imageUrl: 'www.myspace.com/jenny.png'
+        password: '5309'
       })
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.anything(),
-          name: 'Jenny',
-          phone: '555-867-5309',
-          email: 'jenny@jenny.com',
-          communicationMedium: 'phone',
-          imageUrl: 'www.myspace.com/jenny.png',
-          __v: 0
-        });
+      .then(() => {
+        return agent
+          .get('/api/v1/users')
+          .then(res => {
+            expect(res.body).toEqual([{
+              _id: user.id,
+              name: 'Jenny',
+              imageUrl: 'www.myspace.com/jenny.png'
+            }]);
+          });
       });
   });
 
-  it('fails to create a new user with POST when bad data is entered', () => {
-    return request(app)
-      .post('/api/v1/users')
+  it('gets a user by id and organizations they`re a member of with GET', async() => {
+    const user = await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const organization = await Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    });
+
+    await Membership.create({
+      organization: organization._id,
+      user: user._id
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
       .send({
-        name: 'Jenny',
-        phone: '555-867-5309',
         email: 'jenny@jenny.com',
-        communicationMedium: 'text',
-        imageUrl: 'www.myspace.com/jenny.png'
+        password: '5309'
       })
-      .then(res => {
-        expect(res.body).toEqual({
-          status: 400,
-          message: 'User validation failed: communicationMedium: `text` is not a valid enum value for path `communicationMedium`.'
-        });
+      .then(() => {
+        return agent
+          .get(`/api/v1/users/${user._id}`)
+          .then(res => {
+            expect(res.body).toEqual({
+              _id: user.id,
+              name: 'Jenny',
+              phone: '555-867-5309',
+              email: 'jenny@jenny.com',
+              communicationMedium: 'phone',
+              imageUrl: 'www.myspace.com/jenny.png',
+              __v:0,
+              memberships: [{
+                _id: expect.anything(),
+                user: user.id,
+                __v: 0,
+                organization: {
+                  _id: organization.id,
+                  title: organization.title,
+                  imageUrl: organization.imageUrl
+                }
+              }]
+            });
+          });
       });
   });
 
-  it('gets all users with GET', () => {
-    return User.create({
+  it('updates a user by id with PATCH', async() => {
+    const user = await User.create({
       name: 'Jenny',
       phone: '555-867-5309',
       email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
-    })
-      .then(() => request(app).get('/api/v1/users'))
-      .then(res => {
-        expect(res.body).toEqual([{
-          _id: expect.anything(),
-          name: 'Jenny',
-          imageUrl: 'www.myspace.com/jenny.png'
-        }]);
-      });
-  });
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
 
-  // it('gets all users in a particular organization with GET', async() => {
-  //   await User.create([
-  //     {
-  //       name: 'Jenny',
-  //       phone: '555-867-5309',
-  //       email: 'jenny@jenny.com',
-  //       communicationMedium: 'phone',
-  //       imageUrl: 'www.myspace.com/jenny.png',
-  //       organization: 'Portland Police Department'
-  //     },
-  //     {
-  //       name: 'Jasper',
-  //       phone: '555-555-5555',
-  //       email: 'jasper@bestdog.com',
-  //       communicationMedium: 'phone',
-  //       imageUrl: 'www.myspace.com/jasper.png',
-  //       organization: 'dogs'
-  //     },
-  //     {
-  //       name: 'Lola',
-  //       phone: '555-555-0666',
-  //       email: 'lola@cutecat.com',
-  //       communicationMedium: 'phone',
-  //       imageUrl: 'www.myspace.com/lola.png',
-  //       organization: 'cats'
-  //     }
-  //   ]);
+    const agent = request.agent(app);
 
-  //   return request(app)
-  //     .get('/api/v1/users?organization=ORG_ID')
-  //     .then(res => {
-  //       expect(res.body).toEqual([{
-  //         _id: expect.anything(),
-  //         name: 'Jasper',
-  //         imageUrl: 'www.myspace.com/jasper.png'
-  //       }]);
-  //     });
-  // });
-
-  it('gets a user by id with GET', () => {
-    return User.create({
-      name: 'Jenny',
-      phone: '555-867-5309',
-      email: 'jenny@jenny.com',
-      communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
-    })
-      .then(user => request(app).get(`/api/v1/users/${user._id}`))
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.anything(),
-          name: 'Jenny',
-          phone: '555-867-5309',
-          email: 'jenny@jenny.com',
-          communicationMedium: 'phone',
-          imageUrl: 'www.myspace.com/jenny.png',
-          __v:0
-        });
-      });
-  });
-
-  it('updates a user by id with PATCH', () => {
-    return User.create({
-      name: 'Jenny',
-      phone: '555-867-5309',
-      email: 'jenny@jenny.com',
-      communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
-    })
-      .then(user => {
-        return request(app)
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+      .then(() => {
+        return agent
           .patch(`/api/v1/users/${user._id}`)
           .send({
             phone: '555-555-5555',
@@ -160,7 +142,7 @@ describe('user routes', () => {
       })
       .then(res => {
         expect(res.body).toEqual({
-          _id: expect.anything(),
+          _id: user.id,
           name: 'Jenny',
           phone: '555-555-5555',
           email: 'jenny@gmail.com',
@@ -171,25 +153,38 @@ describe('user routes', () => {
       });
   });
 
-  it('deletes a user by id with DELETE', () => {
-    return User.create({
+  it('deletes a user by id with DELETE', async() => {
+    const user = await User.create({
       name: 'Jenny',
-      phone: '555-555-5555',
-      email: 'jenny@gmail.com',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
-    })
-      .then(user => request(app).delete(`/api/v1/users/${user._id}`))
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.anything(),
-          name: 'Jenny',
-          phone: '555-555-5555',
-          email: 'jenny@gmail.com',
-          communicationMedium: 'phone',
-          imageUrl: 'www.myspace.com/jenny.png',
-          __v: 0
-        });
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+      .then(() => {
+        return agent
+          .delete(`/api/v1/users/${user._id}`)
+          .then(res => {
+            expect(res.body).toEqual({
+              _id: user.id,
+              name: 'Jenny',
+              phone: '555-867-5309',
+              email: 'jenny@jenny.com',
+              communicationMedium: 'phone',
+              imageUrl: 'www.myspace.com/jenny.png',
+              __v: 0
+            });
+          });
       });
   });
 });

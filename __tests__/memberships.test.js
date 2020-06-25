@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongod = new MongoMemoryServer();
 const mongoose = require('mongoose');
@@ -36,15 +38,26 @@ describe('membership routes', () => {
       phone: '555-867-5309',
       email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
     });
 
-    return request(app)
-      .post('/api/v1/memberships')
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
       .send({
-        organization: organization._id,
-        user: user._id
+        email: 'jenny@jenny.com',
+        password: '5309'
       })
+
+      .then(() => agent
+        .post('/api/v1/memberships')
+        .send({
+          organization: organization._id,
+          user: user._id
+        }))
+
       .then(res => {
         expect(res.body).toEqual({
           _id: expect.anything(),
@@ -67,7 +80,8 @@ describe('membership routes', () => {
       phone: '555-867-5309',
       email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
     });
 
     const membership = await Membership.create({
@@ -75,24 +89,33 @@ describe('membership routes', () => {
       user: user.id
     });
 
-    return request(app)
-      .get(`/api/v1/memberships?organization=${organization._id}`)
-      .then(res => {
-        expect(res.body).toEqual([{
-          _id: membership.id,
-          organization: { 
-            _id: organization.id,
-            title: organization.title,
-            imageUrl: organization.imageUrl
-          },
-          user: {
-            _id: user.id,
-            name: user.name,
-            imageUrl: user.imageUrl
-          },
-          __v: 0
-        }]);
-      });
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+
+      .then(() => agent
+        .get(`/api/v1/memberships?organization=${organization._id}`)
+        .then(res => {
+          expect(res.body).toEqual([{
+            _id: membership.id,
+            organization: { 
+              _id: organization.id,
+              title: organization.title,
+              imageUrl: organization.imageUrl
+            },
+            user: {
+              _id: user.id,
+              name: user.name,
+              imageUrl: user.imageUrl
+            },
+            __v: 0
+          }]);
+        }));
   });
 
   it('gets all organizations a user is a member of with GET', async() => {
@@ -107,7 +130,8 @@ describe('membership routes', () => {
       phone: '555-867-5309',
       email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
     });
 
     const membership = await Membership.create({
@@ -115,24 +139,33 @@ describe('membership routes', () => {
       user: user.id
     });
 
-    return request(app)
-      .get(`/api/v1/memberships?user=${user._id}`)
-      .then(res => {
-        expect(res.body).toEqual([{
-          _id: membership.id,
-          organization: { 
-            _id: organization.id,
-            title: organization.title,
-            imageUrl: organization.imageUrl
-          },
-          user: {
-            _id: user.id,
-            name: user.name,
-            imageUrl: user.imageUrl
-          },
-          __v: 0
-        }]);
-      });
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+
+      .then(() => agent
+        .get(`/api/v1/memberships?user=${user._id}`)
+        .then(res => {
+          expect(res.body).toEqual([{
+            _id: membership.id,
+            organization: { 
+              _id: organization.id,
+              title: organization.title,
+              imageUrl: organization.imageUrl
+            },
+            user: {
+              _id: user.id,
+              name: user.name,
+              imageUrl: user.imageUrl
+            },
+            __v: 0
+          }]);
+        }));
   });
 
   it('deletes a user membership with DELETE', async() => {
@@ -147,7 +180,8 @@ describe('membership routes', () => {
       phone: '555-867-5309',
       email: 'jenny@jenny.com',
       communicationMedium: 'phone',
-      imageUrl: 'www.myspace.com/jenny.png'
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
     });
 
     const membership = await Membership.create({
@@ -155,15 +189,24 @@ describe('membership routes', () => {
       user: user.id
     });
 
-    return request(app)
-      .delete(`/api/v1/memberships/${membership._id}`)
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.anything(),
-          organization: organization.id,
-          user: user.id,
-          __v: 0
-        });
-      });
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+      
+      .then(() => agent
+        .delete(`/api/v1/memberships/${membership._id}`)
+        .then(res => {
+          expect(res.body).toEqual({
+            _id: expect.anything(),
+            organization: organization.id,
+            user: user.id,
+            __v: 0
+          });
+        }));
   });
 });

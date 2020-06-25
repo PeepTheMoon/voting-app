@@ -14,7 +14,7 @@ Owner = org, parlor = poll, pizza = vote
 
 X * when deleting an organization also delete all polls and votes associated with the organization
 
-* when deleting a membership also delete all votes made by that member
+X * when deleting a membership also delete all votes made by that member
 
 * when getting an organization's details also get all members
 
