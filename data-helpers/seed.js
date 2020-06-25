@@ -7,13 +7,13 @@ const Membership = require('../lib/models/Membership');
 
 module.exports = async({ memberships = 100, organizations = 10, users = 50, polls = 50,  votes = 200 } =  {}) => {
   
-  const createdUsers = await User.create([...Array(users)].map(() => ({
+  const createdUsers = await User.create([...Array(users)].map((_, i) => ({
     name: chance.name(),
     phone: chance.phone(),
-    email: chance.email(),
+    email: `jenny${i}@jenny.com`,
     communicationMedium: chance.pickone(['phone', 'email']),
     imageUrl: chance.avatar(),
-    passwordHash: chance.hash()
+    password: '5309'
   })));
 
   const createdOrganizations = await Organization.create([...Array(organizations)].map(() => ({

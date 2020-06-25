@@ -301,4 +301,54 @@ describe('vote routes', () => {
           });
         }));
   });
+
+  it('gets a list of total votes on a poll and totals for each vote option on a poll with GET', async() => {
+
+    const user = await User.create({
+      name: 'Jenny',
+      phone: '555-867-5309',
+      email: 'jenny@jenny.com',
+      communicationMedium: 'phone',
+      imageUrl: 'www.myspace.com/jenny.png',
+      password: '5309'
+    });
+
+    const organization = await Organization.create({
+      title: 'Portland Police Department',
+      description: 'Police Department for Portland, OR',
+      imageUrl: 'www.policeimage.com/police.png'
+    });
+
+    const poll = await Poll.create({
+      organization: organization._id,
+      title: 'Should we defund the police?',
+      description: 'The police department has a long history of brutality.  Should we move funds to other services instead?',
+      options: ['for', 'against']
+    });
+
+    const vote = await Vote.create({
+      poll: poll._id,
+      user: user._id,
+      optionSelected: 'for'
+    });
+
+    const agent = request.agent(app);
+
+    return agent
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jenny@jenny.com',
+        password: '5309'
+      })
+
+      .then(() => agent
+        .get(`/api/v1/votes/vote-totals/${vote.poll}`)
+        .then(res => {
+          expect(res.body).toEqual([{
+            _id: null,
+            count: expect.any(Number),
+            voteOptions: expect.any(Array)
+          }]);
+        }));
+  });
 });
